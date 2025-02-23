@@ -9,7 +9,7 @@
   font-size: 4.5rem;
 }
 .home-search-container {
-  margin-top: 5rem;
+  margin-top: 1rem;
   display: flex;
   justify-content: center;
   gap: 10px;
@@ -79,8 +79,10 @@
 .home-result-container {
   margin-top: 2rem;
   display: flex;
+  align-items: center;
   justify-content: center;
   width: 800px;
+  flex-direction: column;
 }
 .home-result-disp {
   width: 500px;

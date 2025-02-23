@@ -3,6 +3,28 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
+def get_attn_pad_mask(seq_q, seq_k, device):
+    batch_size, len_q = seq_q.size()
+    batch_size, len_k = seq_k.size()
+    # eq(zero) is PAD token
+    pad_attn_mask = seq_k.data.eq(0).unsqueeze(1).to(device)  # batch_size x 1 x len_k(=len_q), one is masking
+    return pad_attn_mask.expand(batch_size, len_q, len_k)  # batch_size x len_q x len_k
+class Embedding(nn.Module):
+    def __init__(self, vocab_size, max_len, n_segments, d_model, device):
+        super(Embedding, self).__init__()
+        self.tok_embed = nn.Embedding(vocab_size, d_model)  # token embedding
+        self.pos_embed = nn.Embedding(max_len, d_model)      # position embedding
+        self.seg_embed = nn.Embedding(n_segments, d_model)  # segment(token type) embedding
+        self.norm = nn.LayerNorm(d_model)
+        self.device = device
+
+    def forward(self, x, seg):
+        #x, seg: (bs, len)
+        seq_len = x.size(1)
+        pos = torch.arange(seq_len, dtype=torch.long).to(self.device)
+        pos = pos.unsqueeze(0).expand_as(x)  # (len,) -> (bs, len)
+        embedding = self.tok_embed(x) + self.pos_embed(pos) + self.seg_embed(seg)
+        return self.norm(embedding)
 class EncoderLayer(nn.Module):
     def __init__(self, n_heads, d_model, d_ff, d_k, device):
         super(EncoderLayer, self).__init__()

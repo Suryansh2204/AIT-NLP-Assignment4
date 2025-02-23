@@ -1,83 +1,62 @@
-import React from "react";
+import { Bar } from "react-chartjs-2";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-} from "recharts";
+} from "chart.js";
 
-type PredictionData = {
-  name: string;
-  Level1: number;
-  Level2: number;
-  Level3: number;
-};
+// Register required components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 type Props = {
-  val1: number;
-  val2: number;
-  val3: number;
+  probabilities: number[];
 };
 
-const ThreeLevelChart = (props: Props) => {
-  const data: PredictionData[] = [
-    {
-      name: "Level1",
-      Level1: props.val1,
-      Level2: 0,
-      Level3: 0,
+const ProbabilityChart = (props: Props) => {
+  const data = {
+    labels: ["Contradiction", "Neutral", "Entailment"],
+    datasets: [
+      {
+        label: "Probability",
+        data: props.probabilities[0],
+        // data: props.probabilities,
+        backgroundColor: [
+          "rgba(255, 99, 132, 0.6)",
+          "rgba(54, 162, 235, 0.6)",
+          "rgba(75, 192, 192, 0.6)",
+        ],
+        borderColor: [
+          "rgba(255, 99, 132, 1)",
+          "rgba(54, 162, 235, 1)",
+          "rgba(75, 192, 192, 1)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 1, // Since probabilities are between 0 and 1
+      },
     },
-    {
-      name: "Level2",
-      Level1: 0,
-      Level2: props.val2,
-      Level3: 0,
-    },
-    {
-      name: "Level3",
-      Level1: 0,
-      Level2: 0,
-      Level3: props.val3,
-    },
-  ];
-  return (
-    <div className="w-full h-96 p-4 bg-white shadow-lg rounded-xl">
-      <h2 className="text-xl font-semibold text-center mb-4">
-        Three-Level Prediction Chart
-      </h2>
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis domain={[0, 100]} />
-          <Tooltip />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey="Level1"
-            stroke="#8884d8"
-            strokeWidth={2}
-          />
-          <Line
-            type="monotone"
-            dataKey="Level2"
-            stroke="#82ca9d"
-            strokeWidth={2}
-          />
-          <Line
-            type="monotone"
-            dataKey="Level3"
-            stroke="#ff7300"
-            strokeWidth={2}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
+  };
+
+  return <Bar data={data} options={options} />;
 };
 
-export default ThreeLevelChart;
+export default ProbabilityChart;

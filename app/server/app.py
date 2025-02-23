@@ -7,15 +7,7 @@ from utils import *
 app=Flask(__name__)
 
 # Enable CORS
-CORS(app,resources={r"/translate": {"origins": "http://localhost:3000"}})
-
-# with open('./model/model.pkl', 'rb') as model_file:
-#     model = pickle.load(model_file)
-# with open('./model/tokenizer.pkl', 'rb') as tokenizer_file:
-#     tokenizer = pickle.load(tokenizer_file)
-# with open('./model/classifier_head.pkl', 'rb') as classifier_file:
-#     classifier = pickle.load(classifier_file)
-
+CORS(app,resources={r"/*": {"origins": "http://localhost:3000"}})
 
 # define mean pooling function
 def mean_pool(token_embeds, attention_mask):
@@ -76,17 +68,17 @@ def get_device():
     return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-# Load the classifier head
-with open('./model/classifier_head.pkl', 'rb') as f:
-    classifier_head = torch.load(f)
-
 # Load the model
 with open('./model/model.pkl', 'rb') as f:
-    model = torch.load(f)
+    model = torch.load(f, weights_only=False)
+    
+# Load the classifier head
+with open('./model/classifier_head.pkl', 'rb') as f:
+    classifier_head = torch.load(f, weights_only=False)
 
 # Load the tokenizer
 with open('./model/tokenizer.pkl', 'rb') as f:
-    tokenizer = torch.load(f)
+    tokenizer = torch.load(f, weights_only=False)
 
 @app.route('/infer', methods=['GET'])
 def infer():
@@ -94,9 +86,7 @@ def infer():
         premise =  request.args.get('premise') 
         hypothesis =  request.args.get('hypothesis') 
         result = predict_nli_class_with_similarity(model, premise, hypothesis, tokenizer, get_device())
-        # Perform the prediction using the loaded model
-        
-        return jsonify({'result': result})
+        return jsonify({"result":{"predicted_class":result['predicted_class'],"class_probabilities":result['class_probabilities'].tolist()}})
     except Exception as e:
         return jsonify({'error': str(e)})
 

@@ -1,7 +1,12 @@
 import { useState } from "react";
 import "./Home.css";
 import Loader from "../../components/Loader/Loader";
+import ProbabilityChart from "../../components/Charts/Chart";
 
+type responseResult = {
+  predicted_class: string;
+  class_probabilities: number[];
+};
 const Home = () => {
   // state to store the user input for the prompt
   const [premise, setPremise] = useState<string>("");
@@ -12,7 +17,7 @@ const Home = () => {
   // state to store the loading state
   const [loading, setLoading] = useState(false);
   // state to store the result
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<responseResult | null>(null);
 
   // Joins the array of strings with proper spacing
 
@@ -37,13 +42,14 @@ const Home = () => {
           },
         }
       );
+
       if (response.status === 200) {
         const res = await response.json();
         if (res.error) {
           setError(res.error);
         } else {
           console.log(res);
-          // setResult(res.translation);
+          setResult(res.result);
         }
       }
     } catch (error) {
@@ -109,15 +115,14 @@ const Home = () => {
         <button className="button" onClick={handleSubmit}>
           Test
         </button>
-
-        <div className="home-result-container">
-          {result && (
-            <div className="home-result">
-              <div className="home-result-label">Result:</div>
-              <div className="home-result-text">{result}</div>
+        {result && (
+          <div style={{ marginTop: "2rem" }}>
+            <h1>Predicted Class: {result.predicted_class}</h1>
+            <div style={{ height: "600px", width: "700px" }}>
+              <ProbabilityChart probabilities={result.class_probabilities} />
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {error && <div className="home-search-error">* {error}</div>}
       </div>
