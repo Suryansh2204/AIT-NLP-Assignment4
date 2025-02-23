@@ -6,7 +6,7 @@ This project is a web application that performs Natural Language Inference (NLI)
 
 ## 🎥 **App Demo**
 ![image](https://github.com/user-attachments/assets/f11c143a-5db3-434b-9545-441d3e401b35)
-_Screenshot of the Translation Web App Interface_
+_Screenshot of the InferX Web App Interface_
 
 <hr>
 
